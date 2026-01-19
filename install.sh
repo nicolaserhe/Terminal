@@ -10,8 +10,9 @@ HOME_DIR="$HOME"
 # -------------------------------
 # 安装必要软件
 # -------------------------------
-sudo apt update
+sudo apt update && sudo apt upgrade -y
 
+sudo apt install -y curl build-essential golang-go nodejs npm tree
 # 基本工具
 sudo apt install -y \
     zsh \
@@ -20,7 +21,9 @@ sudo apt install -y \
     ripgrep \
     duf \
     fd-find \
-    git
+    tldr \
+    fastfetch \
+    cpufetch
 
 # -------------------------------
 # Zsh 配置
