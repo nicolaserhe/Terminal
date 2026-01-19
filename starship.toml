@@ -1,0 +1,64 @@
+# 在提示符之间插入空行
+add_newline = true
+
+# 核心布局
+# 顺序：图标 -> 用户名 -> 主机名 -> 目录 -> Git -> Go -> 执行时间 -> 换行 -> 提示符
+format = """
+[](bold #bd93f9) $os$username$hostname$directory$git_branch$git_status$golang$cmd_duration$line_break$character"""
+
+# 操作系统图标 (Ubuntu)
+[os]
+disabled = false
+style = "bold #bd93f9"
+symbols = { Ubuntu = " " }
+
+# 用户名
+[username]
+show_always = true
+style_user = "bold #bd93f9"
+format = "[$user]($style) "
+
+# 主机名
+[hostname]
+ssh_only = false
+style = "bold #e8e3ff"
+format = "on [󰌢 $hostname]($style) "
+
+# 目录路径
+[directory]
+style = "bold #bd93f9"
+truncation_length = 3
+truncation_symbol = "…/"
+format = "at [$path]($style) "
+
+# Git 状态
+[git_branch]
+symbol = " "
+style = "bold #73daca"
+format = "via [$symbol$branch]($style) "
+
+[git_status]
+style = "#ff9e64"
+format = '([\[$all_status$ahead_behind\] ]($style))'
+diverged = "⇡${ahead_count}⇣${behind_count}"
+conflicted = " " 
+ahead = "⇡"
+behind = "⇣"
+stashed = "󰏗 "
+
+# 编程语言 (Go)
+[golang]
+symbol = " "
+style = "bold #ffb86c"
+format = "via [$symbol$version]($style) "
+
+# 命令执行时间 (新增)
+[cmd_duration]
+min_time = 2_000      # 仅当命令执行超过 2 秒时显示
+style = "bold #f1fa8c" # 使用经典的亮黄色
+format = "took [$duration]($style) "
+
+# 输入提示符
+[character]
+success_symbol = "[❯](bold #50fa7b)"
+error_symbol = "[❯](bold #f7768e)"
