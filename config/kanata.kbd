@@ -13,10 +13,8 @@
 
 (defalias
   ;; --- 层切换 ---
-;;  te   (layer-switch emacs)         ;; 进入 Emacs 模式
-;;  td   (layer-switch default)       ;; 返回 默认模式
-  te (multi caps (layer-switch emacs))
-  td (multi caps (layer-switch default))
+  te   (layer-switch emacs)         ;; 进入 Emacs 模式
+  td   (layer-switch default)       ;; 返回 默认模式
   sc   (layer-toggle emacs_ctrl)    ;; Emacs 模式下临时开启 Ctrl 功能层
 
   ;; --- 光标移动 ---
@@ -44,15 +42,15 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   esc  _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    met  lalt           _              _    _    _    _    _    _
+  _    _    _         _              _    _    _    _    _    _
 )
 
 (deflayer emacs
   @td                                                              _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    S-q  S-w  S-e  S-r  S-t  S-y  S-u  S-i  S-o  S-p  _    _    _
-  esc  S-a  S-s  S-d  S-f  S-g  S-h  S-j  S-k  S-l  _    _    _
-  _    S-z  S-x  S-c  S-v  S-b  S-n  S-m  _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  esc  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
   @sc  _    _              _              _    _    _    _    _    _
 )
 
