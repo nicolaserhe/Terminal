@@ -3,7 +3,7 @@
 )
 
 (defsrc
-  esc                                                             del
+  esc                                                              del
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
@@ -11,18 +11,57 @@
   lctl lalt met            spc            ralt rctl lft  up   down rght
 )
 
+(defalias
+  ;; --- 层切换 ---
+;;  te   (layer-switch emacs)         ;; 进入 Emacs 模式
+;;  td   (layer-switch default)       ;; 返回 默认模式
+  te (multi caps (layer-switch emacs))
+  td (multi caps (layer-switch default))
+  sc   (layer-toggle emacs_ctrl)    ;; Emacs 模式下临时开启 Ctrl 功能层
+
+  ;; --- 光标移动 ---
+  cf rght                           ;; C-f: 向右
+  cb lft                            ;; C-b: 向左
+  cn down                           ;; C-n: 向下
+  cp up                             ;; C-p: 向上
+  ca home                           ;; C-a: 行首
+  ce end                            ;; C-e: 行尾
+
+  ;; --- 基础编辑 ---
+  ch bspc                           ;; C-h: 退格
+  cm ret                            ;; C-m: 回车
+  cd del                            ;; C-d: 向后删除
+  ct (macro lft S-lft C-x rght C-v) ;; C-t: 调换光标前两字符
+
+  ;; --- 快速剪切 (Kill) ---
+  ck (macro S-end C-x)              ;; C-k: 剪切至行尾
+  cu (macro S-home C-x)             ;; C-u: 剪切整行
+)
+
 (deflayer default
-  caps                                                             _
+  @te                                                              _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   esc  _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
+  _    met  lalt           _              _    _    _    _    _    _
+)
+
+(deflayer emacs
+  @td                                                              _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    S-q  S-w  S-e  S-r  S-t  S-y  S-u  S-i  S-o  S-p  _    _    _
+  esc  S-a  S-s  S-d  S-f  S-g  S-h  S-j  S-k  S-l  _    _    _
+  _    S-z  S-x  S-c  S-v  S-b  S-n  S-m  _    _    _    _
+  @sc  _    _              _              _    _    _    _    _    _
+)
+
+(deflayer emacs_ctrl
+  _                                                                _
+  `    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    @ce  _    @ct  _    @cu  _    _    @cp  _    _    _
+  _    @ca  _    @cd  @cf  _    @ch  _    @ck  _    _    _    _
+  _    _    _    _    _    @cb  @cn  @cm  _    _    _    _
   _    _    _              _              _    _    _    _    _    _
 )
 
-(defoverrides
-  (lctl m) (ret)
-  (lctl h) (bspc)
-  (lctl f) (rght)
-  (lctl b) (lft)
-)
