@@ -12,20 +12,9 @@
 )
 
 (defalias
-  ;; --- 层切换 ---
-  ;; 进入 Emacs 模式，并写入 "Emacs" 到文件
-  te (multi 
-       (layer-switch emacs) 
-       (cmd-action "sh -c \"echo 'λ' > ~/.kanata_layer\"")
-     )
-
-  ;; 返回默认模式，并写入 "Default" 到文件
-  td (multi 
-       (layer-switch default) 
-       (cmd-action "sh -c \"echo '' > ~/.kanata_layer\"")
-     )
-
-  sc   (layer-toggle emacs_ctrl)    ;; Emacs 模式下临时开启 Ctrl 功能层
+  te (layer-switch emacs)
+  td (layer-switch default)
+  sc (layer-toggle emacs_ctrl)    ;; Emacs 模式下临时开启 Ctrl 功能层
 
   ;; --- 光标移动 ---
   cf rght                           ;; C-f: 向右
