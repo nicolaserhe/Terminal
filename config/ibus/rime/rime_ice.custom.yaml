@@ -1,0 +1,19 @@
+patch:
+  # 1. 挂载 lua_processor (必须放在最前面)
+  # 这里的 lua_processor@vim_mode 对应 rime.lua 里 require 的名字
+  engine/processors/@before 0: lua_processor@vim_mode
+
+  # 2. 添加 vmode 开关
+  # IBus 无法自动识别当前是在 终端 还是 浏览器
+  # 所以这里我有两个建议，你二选一修改下面的 reset 值：
+  switches/+:
+    - name: vmode
+      # 设为 1：全局开启 (在浏览器里按 Esc 也会变英文，适合重度 Vim 用户)
+      # 设为 0：默认关闭 (需要配合 key_binder 手动切换，见下文)
+      reset: 1
+      states: [❌, ⚡]
+
+  # 3. (可选) 如果上面 reset 设为 0，你需要绑定一个快捷键来手动开关 Vim 模式
+  # 如果 reset 设为 1，这段可以删掉
+  # key_binder/bindings/+:
+  #   - { when: always, accept: "Control+Shift+V", toggle: vmode }

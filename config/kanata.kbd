@@ -13,8 +13,18 @@
 
 (defalias
   ;; --- 层切换 ---
-  te   (layer-switch emacs)         ;; 进入 Emacs 模式
-  td   (layer-switch default)       ;; 返回 默认模式
+  ;; 进入 Emacs 模式，并写入 "Emacs" 到文件
+  te (multi 
+       (layer-switch emacs) 
+       (cmd-action "sh -c \"echo 'λ' > ~/.kanata_layer\"")
+     )
+
+  ;; 返回默认模式，并写入 "Default" 到文件
+  td (multi 
+       (layer-switch default) 
+       (cmd-action "sh -c \"echo '' > ~/.kanata_layer\"")
+     )
+
   sc   (layer-toggle emacs_ctrl)    ;; Emacs 模式下临时开启 Ctrl 功能层
 
   ;; --- 光标移动 ---
@@ -29,6 +39,8 @@
   ch bspc                           ;; C-h: 退格
   cm ret                            ;; C-m: 回车
   cd del                            ;; C-d: 向后删除
+  cy C-v                            ;; C-v: 粘贴
+  cw C-c                            ;; C-w: 复制
   ct (macro lft S-lft C-x rght C-v) ;; C-t: 调换光标前两字符
 
   ;; --- 快速剪切 (Kill) ---
@@ -57,7 +69,7 @@
 (deflayer emacs_ctrl
   _                                                                _
   `    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    @ce  _    @ct  _    @cu  _    _    @cp  _    _    _
+  _    _    @cw  @ce  _    @ct  @cy  @cu  _    _    @cp  _    _    _
   _    @ca  _    @cd  @cf  _    @ch  _    @ck  _    _    _    _
   _    _    _    _    _    @cb  @cn  @cm  _    _    _    _
   _    _    _              _              _    _    _    _    _    _
