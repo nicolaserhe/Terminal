@@ -27,18 +27,12 @@
   ;; --- 基础编辑 ---
   ch bspc                           ;; C-h: 退格
   cm ret                            ;; C-m: 回车
-  cd del                            ;; C-d: 向后删除
-  cy C-v                            ;; C-v: 粘贴
-  cw C-c                            ;; C-w: 复制
-  ct (macro lft S-lft C-x rght C-v) ;; C-t: 调换光标前两字符
-
-  ;; --- 快速剪切 (Kill) ---
-  ck (macro S-end C-x)              ;; C-k: 剪切至行尾
-  cu (macro S-home C-x)             ;; C-u: 剪切整行
+  cc C-c                            ;; C-c: 复制
+  cv C-v                            ;; C-v: 粘贴
 )
 
 (deflayer default
-  @te                                                              _
+  @te                                                              caps
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   esc  _    _    _    _    _    _    _    _    _    _    _    _
@@ -47,7 +41,7 @@
 )
 
 (deflayer emacs
-  @td                                                              _
+  @td                                                              caps
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   esc  _    _    _    _    _    _    _    _    _    _    _    _
@@ -58,9 +52,9 @@
 (deflayer emacs_ctrl
   _                                                                _
   `    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    @cw  @ce  _    @ct  @cy  @cu  _    _    @cp  _    _    _
-  _    @ca  _    @cd  @cf  _    @ch  _    @ck  _    _    _    _
-  _    _    _    _    _    @cb  @cn  @cm  _    _    _    _
+  _    _    _    @ce  _    _    _    C-u  _    _    @cp  _    _    _
+  _    @ca  _    C-d  @cf  _    @ch  _    _    _    _    _    _
+  _    _    _    @cc  @cv  @cb  @cn  @cm  _    _    _    _
   _    _    _              _              _    _    _    _    _    _
 )
 
