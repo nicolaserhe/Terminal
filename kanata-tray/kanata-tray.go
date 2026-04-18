@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/getlantern/systray"
@@ -20,89 +22,121 @@ type Message struct {
 var (
 	defaultIcon []byte
 	emacsIcon   []byte
-	current     string
+
+	current   = ""
+	layerChan = make(chan string, 16)
 )
 
+func mustReadIcon(name string) []byte {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+
+	path := filepath.Join(home, ".local/share/kanata-tray", name)
+	data, err := os.ReadFile(path)
+	if err != nil || len(data) == 0 {
+		panic("failed to load icon: " + path)
+	}
+	return data
+}
+
 func main() {
-	// 加载 PNG 图标
-	var err error
-	defaultIcon, err = os.ReadFile("/home/gcy/.local/share/kanata-tray/default.png")
-	if err != nil || len(defaultIcon) == 0 {
-		panic("failed to load default.png")
-	}
+	defaultIcon = mustReadIcon("default.png")
+	emacsIcon = mustReadIcon("emacs.png")
 
-	emacsIcon, err = os.ReadFile("/home/gcy/.local/share/kanata-tray/emacs.png")
-	if err != nil || len(emacsIcon) == 0 {
-		panic("failed to load emacs.png")
-	}
-
-	// 启动托盘
 	systray.Run(onReady, onExit)
 }
 
 func onReady() {
 	current = "default"
+
 	systray.SetIcon(defaultIcon)
-	systray.SetTitle("Layer")
 	systray.SetTooltip("Layer: default")
 
-	// 连接 Kanata
-	go connectKanata()
+	// UI 更新 loop（主线程）
+	go func() {
+		for layer := range layerChan {
+			updateUI(layer)
+		}
+	}()
+
+	// 网络线程
+	go connectLoop()
 }
 
 func onExit() {}
 
-func connectKanata() {
+func updateUI(layer string) {
+	if layer == "" || layer == current {
+		return
+	}
+
+	current = layer
+
+	switch layer {
+	case "emacs":
+		systray.SetIcon(emacsIcon)
+	default:
+		systray.SetIcon(defaultIcon)
+	}
+
+	systray.SetTooltip("Layer: " + layer)
+	fmt.Println("→", layer)
+}
+
+func connectLoop() {
 	for {
-		// 建立 TCP 客户端连接
-		conn, err := net.Dial("tcp", "localhost:5829")
+		conn, err := net.DialTimeout("tcp", "127.0.0.1:5829", 3*time.Second)
 		if err != nil {
-			fmt.Println("Failed to connect Kanata, retrying in 1s:", err)
-			// 等一秒再重连
-			// 避免程序退出
-			// 你可以调成 longer if needed
-			select {
-			case <-time.After(1e9):
-				continue
-			}
+			fmt.Println("[kanata] connect failed:", err)
+			time.Sleep(2 * time.Second)
+			continue
 		}
 
-		fmt.Println("Connected to Kanata on 5829")
-		handleConnection(conn)
+		fmt.Println("[kanata] connected")
+
+		handleConn(conn)
+
 		conn.Close()
-		fmt.Println("Disconnected, retrying...")
+		fmt.Println("[kanata] disconnected, retrying...")
+		time.Sleep(time.Second)
 	}
 }
 
-func handleConnection(conn net.Conn) {
-	scanner := bufio.NewScanner(conn)
-	for scanner.Scan() {
-		line := scanner.Text()
+func handleConn(conn net.Conn) {
+	reader := bufio.NewReader(conn)
+
+	for {
+		// 防止卡死
+		_ = conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("[kanata] read error:", err)
+			return
+		}
+
+		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
 
 		var msg Message
 		if err := json.Unmarshal([]byte(line), &msg); err != nil {
-			fmt.Println("JSON parse error:", err)
+			fmt.Println("[kanata] json error:", err)
 			continue
 		}
 
-		switch msg.LayerChange.New {
-		case "emacs":
-			if current != "emacs" {
-				current = "emacs"
-				systray.SetIcon(emacsIcon)
-				systray.SetTooltip("Layer: emacs")
-				fmt.Println("→ emacs")
-			}
-		case "default":
-			if current != "default" {
-				current = "default"
-				systray.SetIcon(defaultIcon)
-				systray.SetTooltip("Layer: default")
-				fmt.Println("→ default")
-			}
+		layer := msg.LayerChange.New
+		if layer == "" {
+			continue
+		}
+
+		select {
+		case layerChan <- layer:
+		default:
+			// channel 满了就丢（避免阻塞）
 		}
 	}
 }
