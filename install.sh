@@ -73,8 +73,8 @@ install_system_packages() {
 
     print_step "安装基础工具..."
     local base_packages=(
-        curl wget build-essential cmake pkg-config
-        python3 libfreetype6-dev libfontconfig1-dev
+        curl wget unzip build-essential cmake pkg-config
+        python3 python3-venv libfreetype6-dev libfontconfig1-dev
         libxcb-xfixes0-dev libxkbcommon-dev
     )
     run_silent sudo apt install -y "${base_packages[@]}"
@@ -83,6 +83,7 @@ install_system_packages() {
     print_step "安装命令行工具..."
     local cli_packages=(
         zsh alacritty fzf ripgrep duf fd-find tldr tree
+        tree-sitter-cli
     )
     run_silent sudo apt install -y "${cli_packages[@]}"
     print_success "命令行工具安装完成"
@@ -248,7 +249,22 @@ install_terminal_tools() {
     fi
 
     if [[ ! -d "$CONFIG_DIR/nvim" ]]; then
+        print_step "克隆 Neovim 配置..."
         run_silent git clone https://github.com/nicolaserhe/nvim "$CONFIG_DIR/nvim"
+        print_success "Neovim 配置已克隆"
+    else
+        print_warning "Neovim 配置已存在,跳过克隆"
+    fi
+
+    if command_exists python3; then
+        print_step "运行 bootstrap.py 安装插件..."
+        (
+            cd "$CONFIG_DIR/nvim"
+            python3 bootstrap.py
+        )
+        print_success "插件安装完成"
+    else
+        print_warning "python3 未找到,跳过插件安装。首次启动 nvim 前需手动运行: cd ~/.config/nvim && python3 bootstrap.py"
     fi
 }
 
@@ -378,7 +394,7 @@ show_menu() {
 interactive_install() {
     while true; do
         show_menu
-        read -r -p "请输入选项 [0-6]: " choice
+        read -r -p "请输入选项 [0-7]: " choice
 
         case "$choice" in
         1) install_system_packages && install_lsd ;;
@@ -434,6 +450,8 @@ show_completion() {
     echo -e "${COLOR_BLUE}下一步操作：${COLOR_RESET}"
     echo -e "  1. 重新打开终端,或运行: ${COLOR_YELLOW}source ~/.zshrc${COLOR_RESET}"
     echo -e "  2. 如果 Shell 未切换,运行: ${COLOR_YELLOW}exec zsh${COLOR_RESET}"
+    echo ""
+    echo -e "  3. 首次启动 Neovim 会自动编译 Treesitter: ${COLOR_YELLOW}nvim${COLOR_RESET}"
     echo ""
     echo -e "${COLOR_BLUE}日志文件：${COLOR_RESET}${LOG_FILE}"
     echo ""
